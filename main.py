@@ -9,7 +9,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     try:
         # Define the S3 bucket and key directly
         s3_bucket = "naii-01-dir"
-        s3_key = "01-028/test.docx"
+        s3_key = "01-028/test_" + ''.join(random.choices(string.ascii_letters + string.digits, k=8)) + ".docx"
 
         # Set up AWS credentials directly
         aws_access_key_id = os.environ["aws_access_key_id"]
