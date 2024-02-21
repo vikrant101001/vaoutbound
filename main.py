@@ -13,9 +13,9 @@ def main(req: HttpRequest) -> HttpResponse:
             return HttpResponse("Missing required parameters", status_code=400)
 
         # Set up AWS credentials directly
-        aws_access_key_id = "YOUR_AWS_ACCESS_KEY_ID"
-        aws_secret_access_key = "YOUR_AWS_SECRET_ACCESS_KEY"
-        aws_region = "YOUR_AWS_REGION"
+        aws_access_key_id = os.environ["aws_access_key_id"]
+        aws_secret_access_key = os.environ["aws_secret_access_key"]
+        aws_region = "us-east-1"
 
         # Upload file to S3
         s3 = boto3.client("s3", aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key, region_name=aws_region)
