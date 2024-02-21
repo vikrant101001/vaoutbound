@@ -1,6 +1,8 @@
 import os
-import random
+import tempfile
 import boto3
+import random
+import string
 import azure.functions as func
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
@@ -14,16 +16,21 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         aws_secret_access_key = os.environ["aws_secret_access_key"]
         aws_region = "us-east-1"
 
-        # Fetch a random document from the S3 bucket (replace this logic with your own)
+        # Generate random content for the .docx file
+        content = ''.join(random.choices(string.ascii_letters + string.digits, k=1000))
+
+        # Create a new temporary file for the .docx document
+        with tempfile.NamedTemporaryFile(suffix='.docx', delete=False) as tmp_file:
+            tmp_file.write(content.encode())
+            tmp_file_path = tmp_file.name
+
+        # Upload the document to S3
         s3 = boto3.client("s3", aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key, region_name=aws_region)
-        # List all objects in the bucket
-        objects = s3.list_objects(Bucket=s3_bucket)['Contents']
-        # Choose a random object key
-        random_object_key = random.choice(objects)['Key']
+        s3.upload_file(tmp_file_path, s3_bucket, s3_key)
 
-        # Upload the random document to another location within the same bucket
-        s3.copy_object(Bucket=s3_bucket, Key=s3_key, CopySource={'Bucket': s3_bucket, 'Key': random_object_key})
+        # Delete the temporary file
+        os.unlink(tmp_file_path)
 
-        return func.HttpResponse("File uploaded to S3 successfully", status_code=200)
+        return func.HttpResponse("Random document uploaded successfully to S3!", status_code=200)
     except Exception as e:
         return func.HttpResponse(f"Error: {str(e)}", status_code=500)
